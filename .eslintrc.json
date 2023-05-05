@@ -38,6 +38,7 @@
         "require-jsdoc":"off",
         "max-len": "off",
         "new-cap": "off",
-        "@typescript-eslint/await-thenable": 2
+        "@typescript-eslint/await-thenable": 2,
+        "@typescript-eslint/no-non-null-assertion": "off"
     }
 }
