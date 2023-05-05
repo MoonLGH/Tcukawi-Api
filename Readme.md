@@ -12,3 +12,26 @@ expected output
                                 -> body example
                                 -> output example
                                 -> exports an express router
+
+
+
+Structure ->
+            src -> app - index as main router and / (which actually just return 200 and api ready)
+                       - util -
+                              - test.ts
+                              - endpoints & types
+                       - endpoints - 
+                                   - **.ts
+            (should be monorepo(hopefully))
+            packages -> ** -> src -
+                                  - util -
+                                         - handler
+                                         - endpoints (to actually get endpoint from api)
+                                  - lib - types gatherer
+                                        - interface
+
+
+endpoints exporting docs
+// body : boolean (determining does an endpoint need a body or not)
+// bodyObject : {[x]:[y]} (Object that will be parsed to body if `body` true)
+// EOL (endOfLine must be emmited on every docs)
