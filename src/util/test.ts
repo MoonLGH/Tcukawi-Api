@@ -2,14 +2,21 @@
 import axios from "axios";
 import {readdirSync, readFileSync} from "fs";
 
+
 async function startTest() {
 	const dirs = readdirSync("./dist/app/", {
 		withFileTypes: true,
-	}).filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
+	})
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
 
 	for (const folder of dirs) {
-		for (const file of readdirSync("./dist/app/" + folder).filter((file) => file.endsWith(".ts") || file.endsWith(".js"))) {
-			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {encoding: "utf-8"});
+		for (const file of readdirSync(`./dist/app/${folder}`).filter(
+			(file) => file.endsWith(".ts") || file.endsWith(".js"),
+		)) {
+			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {
+				encoding: "utf-8",
+			});
 			const endpoints = parseEndpoints(fileData);
 			console.log("[Tester] Router: " + folder + " File: " + file);
 			console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
@@ -29,19 +36,17 @@ async function startTest() {
 						},
 						data: parsedData.testInput,
 					});
-					console.log(
-						"[Tester-Response] Response: " + JSON.stringify(res.data),
-					);
+					console.log("[Tester-Response] Response: " + JSON.stringify(res.data));
 				} catch (err) {
-					console.log(
-						`[Tester-Response] Error on ${parsedData.path}: ` + err,
+					console.error(
+						"[Tester-Response] Error on " + parsedData.path + ": " + err,
 					);
+					process.exit(1); // Exit the process with a non-zero code to indicate failure
 				}
 			}
 		}
 	}
 }
-
 
 interface FileInterface {
 	method?: string;
