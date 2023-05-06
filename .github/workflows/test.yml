@@ -24,5 +24,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Start server
+        run: npm run start &
+        background: true
+
+      - name: Wait for server to start
+        run: sleep 5s
+
       - name: Run tests
         run: node dist/src/util/test.ts
