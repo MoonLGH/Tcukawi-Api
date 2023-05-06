@@ -31,4 +31,4 @@ jobs:
         run: sleep 10s
 
       - name: Run tests
-        run: node dist/src/util/test.ts
+        run: node dist/src/util/test.js
