@@ -25,7 +25,23 @@ async function startTest() {
 				const parsedData = parseEndpoint(endpoint);
 				console.log("[Tester] Endpoint: " + parsedData.method + " " + parsedData.path);
 				if (parsedData.body) {
-					console.log("[Tester] TestInput: " + JSON.stringify(parsedData.testInput));
+					console.log("[Tester] bodyTestInput: " + JSON.stringify(parsedData.bodyTestInput));
+				}
+				if (parsedData.params) {
+					// loop through paramsTest and append to path
+					console.log("[Tester] paramsTest: " + JSON.stringify(parsedData.paramsTest));
+					let paramsAppend = "?";
+					for (const key in parsedData.paramsTest) {
+						// eslint-disable-next-line no-prototype-builtins
+						if (parsedData.paramsTest!.hasOwnProperty(key)) {
+							const value:string = parsedData.paramsTest![key as keyof typeof parsedData.paramsTest];
+							paramsAppend += key + "=" + `${value}` + "&";
+						}
+					}
+					console.log(parsedData.paramsTest);
+					paramsAppend = paramsAppend.slice(0, -1);
+					console.log("[Tester] paramsAppend: " + paramsAppend);
+					parsedData.path += paramsAppend;
 				}
 				try {
 					const res = await axios.request({
@@ -34,10 +50,9 @@ async function startTest() {
 						headers: {
 							"Content-Type": "application/json",
 						},
-						data: parsedData.testInput,
+						data: parsedData.bodyTestInput,
 					});
 					console.log("[Tester-Response] Response: " + JSON.stringify(res.data));
-
 					if (res.status >= 400) {
 						console.error(
 							"[Tester-Response] Error on " +
@@ -54,6 +69,7 @@ async function startTest() {
 					process.exit(1); // Exit the process with a non-zero code to indicate failure
 				}
 			}
+			console.log("\n");
 		}
 	}
 }
@@ -63,9 +79,12 @@ interface FileInterface {
 	path?: string;
 	body?: boolean;
 	bodyObject?: object;
+	params?: boolean;
+	paramsTest?: object;
 	npm?: string;
-	testInput?: object;
+	bodyTestInput?: object;
 }
+
 
 function parseEndpoint(code: string) {
 	const endpointData = code;
@@ -92,10 +111,22 @@ function parseEndpoint(code: string) {
 		endpoint.npm = npmMatch[1];
 	}
 
-	const testInputMatch = endpointData.match(/TestInput\s+:\s+(\{[\s\S]+?\})/);
+	const testInputMatch = endpointData.match(/bodyTestInput\s+:\s+(\{[\s\S]+?\})/);
 	if (testInputMatch) {
-		endpoint.testInput = JSON.parse(testInputMatch[1].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, "\"$2\": "));
+		endpoint.bodyTestInput = JSON.parse(testInputMatch[1].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, "\"$2\": "));
 	}
+
+	const paramsMatch = endpointData.match(/params\s+:\s+(\S+)/);
+	if (paramsMatch) {
+		endpoint.params = paramsMatch[1] === "true";
+	}
+
+	const paramsInputTest = endpointData.match(/paramsTest\s+:\s+(\{[\s\S]+?\})/);
+	if (paramsInputTest) {
+		const text = paramsInputTest[1].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, "\"$2\": ");
+		endpoint.paramsTest = JSON.parse(text!.replaceAll("\\", ""));
+	}
+
 	return endpoint;
 }
 

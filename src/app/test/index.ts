@@ -17,11 +17,25 @@ router.get("/", (req, res) => {
 // body : true
 // bodyObject : {message:"ANYMESSAGE"}
 // NPM : api.call.test.bodyTest(message)
-// TestInput : {message:"Test"}
+// bodyTestInput : {message:"Test"}
 // Expected Output : TestOutput
 // Documentation - END
 router.post("/bodyTest", (req, res) => {
 	const {message} = req.body;
+	if (!message) return res.status(400).json({message: "No message provided"});
+	res.status(200).json({message: message});
+});
+
+// Documentation - START
+// GET : /test/paramsTest
+// body : false
+// params : true
+// paramsTest : {message:"Hello, World"}
+// NPM : api.call.downloader.paramsTest(message)
+// Expected Output : TestOutput
+// Documentation - END
+router.get("/paramsTest", (req, res) => {
+	const {message} = req.query;
 	if (!message) return res.status(400).json({message: "No message provided"});
 	res.status(200).json({message: message});
 });

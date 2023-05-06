@@ -25,7 +25,7 @@ async function loadRouters() {
 			const stack= router.default.stack;
 			for (const route of stack) {
 				if (route.route) {
-					console.log(`[Handler] Endpoint path: /${folder}${route.route.path} Loaded`);
+					console.log(`[Handler] Endpoint path: /${folder}${route.route.path} on ${file} Loaded`);
 				}
 			}
 			console.log(`[Handler] Router ${folder} Loaded `+ stack.filter((r:express.Router) => r.route).length + " Endpoints");
