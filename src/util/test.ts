@@ -37,6 +37,16 @@ async function startTest() {
 						data: parsedData.testInput,
 					});
 					console.log("[Tester-Response] Response: " + JSON.stringify(res.data));
+
+					if (res.status >= 400) {
+						console.error(
+							"[Tester-Response] Error on " +
+							parsedData.path +
+							": Received HTTP status " +
+							res.status,
+						);
+						process.exit(1); // Exit the process with a non-zero code to indicate failure
+					}
 				} catch (err) {
 					console.error(
 						"[Tester-Response] Error on " + parsedData.path + ": " + err,
