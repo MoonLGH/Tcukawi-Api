@@ -1,5 +1,5 @@
 {
-    "ignorePatterns": ["node_modules/", "dist/","packages/"],
+    "ignorePatterns": ["node_modules/", "dist/"],
     "env": {
         "es2021": true,
         "node": true
@@ -11,7 +11,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json",
+        "project": ["./tsconfig.json","./packages/*/tsconfig.json"],
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
