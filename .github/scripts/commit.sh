@@ -4,7 +4,7 @@ set -e
 git config --global user.email "github-actions[bot]@users.noreply.github.com"
 git config --global user.name "github-actions[bot]"
 git status docs
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(git status docs --porcelain)" ]; then
     git add .
     git commit -m "Update Documentation"
     git push
