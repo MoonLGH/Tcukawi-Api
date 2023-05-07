@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -19,17 +18,10 @@ jobs:
       - name: Generate Docs
         run: yarn gendocs
 
-      - name: Configure Git
+      - name: Make script executeable
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      - name: Clone Tcukawi/Docs repository
+          chmod +x ./.github/scripts/commit.sh
+          
+      - name: Execute script to push docs
         run: |
-          git clone https://github.com/MoonLGH/Tcukawi-API.git
-          rm -rf Tcukawi-API/docs
-          cp -r docs/. Tcukawi-API/docs
-          cd Tcukawi-API/docs
-          git add .
-          git commit -m "Update docs"
-          git push origin main
+          ./.github/scripts/commit.sh
