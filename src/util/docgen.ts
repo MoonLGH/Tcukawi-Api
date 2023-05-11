@@ -22,19 +22,24 @@ async function generateInterface() {
 			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {
 				encoding: "utf-8",
 			});
-			const endpoints = parseEndpoints(fileData);
-			console.log("[Tester] Router: " + folder + " File: " + file);
-			console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
 
-			fs.writeFileSync(`./docs/interfaces/${file.replace(".js", "")}.md`, endpoints.trim(), {encoding: "utf-8"});
+			const splitedInterface = fileData.split("// Expected Output Interface - START");
+
+			for (let i = 1; i < splitedInterface.length; i++) {
+				const endpoints = parseEndpoints(splitedInterface[i]);
+				console.log("[Tester] Router: " + folder + " File: " + file);
+				console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
+
+				const filename = endpoints.split("{")[0].split("interface")[1].trim();
+				fs.writeFileSync(`./docs/interfaces/${filename}.md`, endpoints.trim(), {encoding: "utf-8"});
+			}
 		}
 	}
 }
 
 
 function parseEndpoints(code: string) {
-	const endpoints = code.split("// Expected Output Interface - START");
-	const text = endpoints[1].split("// Expected Output Interface - END")[0].replaceAll("//", "");
+	const text = code.split("// Expected Output Interface - END")[0].replaceAll("//", "");
 
 	const returnedText = prettier.format(text, {
 		parser: "typescript",
@@ -83,19 +88,89 @@ async function generateAPIDocs(code: string) {
 		endpoint.params = paramsMatch[1] === "true";
 	}
 
-	const paramsInputTest = endpointData.match(/paramsTest\s+:\s+(\{[\s\S]+?\})/);
-	if (paramsInputTest) {
-		const text = paramsInputTest[1].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, "\"$2\": ");
-		endpoint.paramsTest = JSON.parse(text!.replaceAll("\\", ""));
+
+	const expected = endpointData.match(/Expected Output\s+:\s+(\S+)/);
+	if (expected) {
+		endpoint.expected = expected[1];
+	}
+	if (paramsMatch) {
+		const paramsInputTest = endpointData.match(/paramsTest\s+:\s+(\{[\s\S]+?\})/);
+		if (paramsInputTest) {
+			const text = paramsInputTest[1].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, "\"$2\": ");
+			endpoint.paramsTest = JSON.parse(text!.replaceAll("\\", ""));
+		}
 	}
 
 	return endpoint;
 }
 
+async function startAPIDocs() {
+	const dirs = readdirSync("./dist/app/", {
+		withFileTypes: true,
+	})
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
+
+
+	if (fs.existsSync("./docs/API")) {
+		fs.rmSync("./docs/API", {recursive: true});
+	}
+
+	fs.mkdirSync("./docs/API");
+	for (const folder of dirs) {
+		for (const file of readdirSync(`./dist/app/${folder}`).filter(
+			(file) => file.endsWith(".ts") || file.endsWith(".js"),
+		)) {
+			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {
+				encoding: "utf-8",
+			});
+			const endpoints = parseEndpointsAPI(fileData);
+			for (const endpoint of endpoints) {
+				const parsedData = await generateAPIDocs(endpoint);
+				let text = `
+# ${parsedData.method} ${parsedData.path}
+
+-NPM: ${parsedData.npm}
+-Body: ${parsedData.body}
+-Params: ${parsedData.params}
+
+				`;
+				if (parsedData.bodyTestInput) {
+					text += `
+## Body Object
+\`\`\`json
+${JSON.stringify(parsedData.bodyTestInput, null, 2)}
+\`\`\`
+					`;
+				}
+
+				if (parsedData.paramsTest) {
+					text += `
+## Body Test Input
+\`\`\`json
+${JSON.stringify(parsedData.paramsTest, null, 2)}
+\`\`\`
+					`;
+
+					if (parsedData.expected) {
+						text += `
+## Expected Output : ${parsedData.expected}
+
+`;
+					}
+					const filename = parsedData.path!.replaceAll("/", "-");
+					console.log("[Tester-API] Router: " + folder + " File: " + file);
+					fs.writeFileSync(`./docs/API/${filename}.md`, text, {encoding: "utf-8"});
+				}
+			}
+		}
+	}
+}
 
 generateInterface();
 
 interface FileInterface {
+	expected?: string;
 	method?: string;
 	path?: string;
 	body?: boolean;
@@ -107,4 +182,19 @@ interface FileInterface {
 }
 
 
-generateAPIDocs("");
+startAPIDocs();
+function parseEndpointsAPI(code: string) {
+	const endpoints = code.split("// Documentation - START");
+	endpoints.shift();
+	let data = endpoints.map((endpoint) => {
+		const endpointData = endpoint.split("// Documentation - END")[0];
+		return endpointData;
+	});	// return code.split("// EOL");
+
+	// prettify data. like remove \n and \t and \\
+	data = data.map((endpoint) => {
+		return endpoint.split("\n").join(" ");
+	});
+
+	return data;
+}

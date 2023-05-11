@@ -12,6 +12,7 @@ const router = Router();
 // NPM : api.call.downloader.instagram(link)
 // Expected Output : IGDLResponse
 // Documentation - END
+
 router.get("/instagram", async (req, res) => {
 	const {link} = req.query;
 	if (!link) return res.status(400).json({message: "No link provided"});

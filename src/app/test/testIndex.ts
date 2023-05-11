@@ -48,3 +48,9 @@ export default router;
 //     message: string;
 // }
 // Expected Output Interface - END
+
+// Expected Output Interface - START
+// interface TestOutput1 {
+//     message: string;
+// }
+// Expected Output Interface - END
