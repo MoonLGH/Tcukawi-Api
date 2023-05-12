@@ -1,12 +1,9 @@
-
 # GET test/paramsTest
 
 -NPM: api.call.downloader.paramsTest(message)
--Body: false
--Params: true
 
-				
-## Body Test Input
+-Params
+## Params Test Input
 ```json
 {
   "message": "Hello, World"

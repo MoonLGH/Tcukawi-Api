@@ -1,8 +1,8 @@
+/* eslint-disable no-invalid-this */
 import axios from "axios";
-import {load} from "cheerio";
 import {Router} from "express";
 const router = Router();
-
+import {load} from "cheerio";
 
 // Documentation - START
 // GET : /downloader/instagram
@@ -30,7 +30,6 @@ router.get("/instagram", async (req, res) => {
 		return res.status(400).json({message: "Invalid link"});
 	}
 });
-
 
 export default router;
 

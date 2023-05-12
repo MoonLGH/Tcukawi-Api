@@ -124,17 +124,18 @@ async function startAPIDocs() {
 			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {
 				encoding: "utf-8",
 			});
+
 			const endpoints = parseEndpointsAPI(fileData);
+			console.log(endpoints);
 			for (const endpoint of endpoints) {
 				const parsedData = await generateAPIDocs(endpoint);
 				let text = `
 # ${parsedData.method} ${parsedData.path}
 
 -NPM: ${parsedData.npm}
--Body: ${parsedData.body}
--Params: ${parsedData.params}
 
-				`;
+${parsedData.body ? "-Body" : ""}${parsedData.params ? "-Params" : ""}
+				`.trim();
 				if (parsedData.bodyTestInput) {
 					text += `
 ## Body Object
@@ -146,22 +147,26 @@ ${JSON.stringify(parsedData.bodyTestInput, null, 2)}
 
 				if (parsedData.paramsTest) {
 					text += `
-## Body Test Input
+## Params Test Input
 \`\`\`json
 ${JSON.stringify(parsedData.paramsTest, null, 2)}
 \`\`\`
 					`;
-
-					if (parsedData.expected) {
-						text += `
+				}
+				if (parsedData.expected) {
+					text += `
 ## Expected Output : ${parsedData.expected}
 
 `;
-					}
-					const filename = parsedData.path!.replaceAll("/", "-");
-					console.log("[Tester-API] Router: " + folder + " File: " + file);
-					fs.writeFileSync(`./docs/API/${filename}.md`, text, {encoding: "utf-8"});
 				}
+
+				console.log(parsedData.path);
+				let filename = parsedData.path!.replaceAll("/", "-");
+				if (filename.endsWith("-")) {
+					filename = filename.slice(0, -1);
+				}
+				console.log("[Tester-API] Router: " + folder + " File: " + file);
+				fs.writeFileSync(`./docs/API/${filename}.md`, text, {encoding: "utf-8"});
 			}
 		}
 	}
