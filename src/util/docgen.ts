@@ -1,7 +1,8 @@
-import {readdirSync, readFileSync} from "fs";
+import {readdirSync, readFileSync, writeFileSync} from "fs";
 import fs from "fs";
 import prettier from "prettier";
 
+const interfaceDocs: {[key: string]: string} = {};
 async function generateInterface() {
 	const dirs = readdirSync("./dist/app/", {
 		withFileTypes: true,
@@ -31,6 +32,7 @@ async function generateInterface() {
 				console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
 
 				const filename = endpoints.split("{")[0].split("interface")[1].trim();
+				interfaceDocs[filename] = "./docs/interfaces/" + filename + ".md";
 				fs.writeFileSync(`./docs/interfaces/${filename}.md`, endpoints.trim(), {encoding: "utf-8"});
 			}
 		}
@@ -104,6 +106,7 @@ async function generateAPIDocs(code: string) {
 	return endpoint;
 }
 
+const APIPath: {[key: string]: string} = {};
 async function startAPIDocs() {
 	const dirs = readdirSync("./dist/app/", {
 		withFileTypes: true,
@@ -165,6 +168,7 @@ ${JSON.stringify(parsedData.paramsTest, null, 2)}
 				if (filename.endsWith("-")) {
 					filename = filename.slice(0, -1);
 				}
+				APIPath[filename] = "./docs/API/" + filename + ".md";
 				console.log("[Tester-API] Router: " + folder + " File: " + file);
 				fs.writeFileSync(`./docs/API/${filename}.md`, text, {encoding: "utf-8"});
 			}
@@ -172,7 +176,7 @@ ${JSON.stringify(parsedData.paramsTest, null, 2)}
 	}
 }
 
-generateInterface();
+generateInterface().then(createPathJSON);
 
 interface FileInterface {
 	expected?: string;
@@ -187,7 +191,7 @@ interface FileInterface {
 }
 
 
-startAPIDocs();
+startAPIDocs().then(createPathJSON);
 function parseEndpointsAPI(code: string) {
 	const endpoints = code.split("// Documentation - START");
 	endpoints.shift();
@@ -203,3 +207,16 @@ function parseEndpointsAPI(code: string) {
 
 	return data;
 }
+
+const data = JSON.parse(readFileSync("./docs/defaultPath.json", {encoding: "utf-8"}));
+
+function createPathJSON() {
+	if (fs.statSync("./docs/path.json").isFile()) {
+		fs.rmSync("./docs/path.json");
+	}
+	data["API"] = APIPath;
+	data["INTERFACE"] = interfaceDocs;
+
+	writeFileSync("./docs/path.json", JSON.stringify(data, null, 2), {encoding: "utf-8"});
+}
+

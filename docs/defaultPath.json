@@ -1,0 +1,10 @@
+{
+    "config":{
+        "default":"main",
+        "order":["main","rateLimit","response","token"]
+    },
+    "main":"main.md",
+    "rateLimit":"rate-limit.md",
+    "response":"response.md",
+    "token":"token.md"
+}

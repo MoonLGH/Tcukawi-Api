@@ -1,0 +1,28 @@
+{
+  "config": {
+    "default": "main",
+    "order": [
+      "main",
+      "rateLimit",
+      "response",
+      "token"
+    ]
+  },
+  "main": "main.md",
+  "rateLimit": "rate-limit.md",
+  "response": "response.md",
+  "token": "token.md",
+  "API": {
+    "downloader-instagram": "./docs/API/downloader-instagram.md",
+    "downloader-tiktok": "./docs/API/downloader-tiktok.md",
+    "test": "./docs/API/test.md",
+    "test-bodyTest": "./docs/API/test-bodyTest.md",
+    "test-paramsTest": "./docs/API/test-paramsTest.md"
+  },
+  "INTERFACE": {
+    "IGDLResponse": "./docs/interfaces/IGDLResponse.md",
+    "TikTokOutput": "./docs/interfaces/TikTokOutput.md",
+    "TestOutput": "./docs/interfaces/TestOutput.md",
+    "TestOutput1": "./docs/interfaces/TestOutput1.md"
+  }
+}
