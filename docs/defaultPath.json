@@ -5,6 +5,6 @@
     },
     "main":"main.md",
     "rateLimit":"rate-limit.md",
-    "response":"response.md",
+    "response":"responses.md",
     "token":"token.md"
 }
