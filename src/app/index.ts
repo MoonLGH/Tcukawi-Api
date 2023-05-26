@@ -3,6 +3,7 @@ import {readdirSync} from "fs";
 import cors from "cors";
 import {globalRoutes} from "../util/variables.js";
 const port = 3000;
+let ready = false;
 const app = express();
 // app cors allow all
 
@@ -38,6 +39,7 @@ async function loadRouters() {
 async function start() {
 	await loadRouters();
 	app.listen(port, () => console.log(`[Express] Server started on port ${port}`));
+	ready = true;
 }
 
-export {start};
+export {start, ready};

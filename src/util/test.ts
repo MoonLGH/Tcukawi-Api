@@ -74,6 +74,82 @@ async function startTest() {
 	}
 }
 
+export async function endpointTest() {
+	const response: {[key: string]: {
+		[key: string]: string | number | boolean
+	}} = {};
+	const dirs = readdirSync("./dist/app/", {
+		withFileTypes: true,
+	})
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
+
+	for (const folder of dirs) {
+		for (const file of readdirSync(`./dist/app/${folder}`).filter(
+			(file) => file.endsWith(".ts") || file.endsWith(".js"),
+		)) {
+			const fileData = readFileSync(`./dist/app/${folder}/${file}`, {
+				encoding: "utf-8",
+			});
+			const endpoints = parseEndpoints(fileData);
+			console.log("[Tester] Router: " + folder + " File: " + file);
+			console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
+			console.log("[Tester] Running tests...");
+			for (const endpoint of endpoints) {
+				const parsedData = parseEndpoint(endpoint);
+				console.log("[Tester] Endpoint: " + parsedData.method + " " + parsedData.path);
+				if (parsedData.body) {
+					console.log("[Tester] bodyTestInput: " + JSON.stringify(parsedData.bodyTestInput));
+				}
+				if (parsedData.params) {
+					// loop through paramsTest and append to path
+					console.log("[Tester] paramsTest: " + JSON.stringify(parsedData.paramsTest));
+					let paramsAppend = "?";
+					for (const key in parsedData.paramsTest) {
+						// eslint-disable-next-line no-prototype-builtins
+						if (parsedData.paramsTest!.hasOwnProperty(key)) {
+							const value:string = parsedData.paramsTest![key as keyof typeof parsedData.paramsTest];
+							paramsAppend += key + "=" + `${value}` + "&";
+						}
+					}
+					console.log(parsedData.paramsTest);
+					paramsAppend = paramsAppend.slice(0, -1);
+					console.log("[Tester] paramsAppend: " + paramsAppend);
+					parsedData.path += paramsAppend;
+				}
+				try {
+					const res = await axios.request({
+						method: parsedData.method,
+						url: "http://localhost:3000/" + parsedData.path,
+						headers: {
+							"Content-Type": "application/json",
+						},
+						data: parsedData.bodyTestInput,
+					});
+					console.log("[Tester-Response] Response: " + JSON.stringify(res.data));
+					if (res.status >= 400) {
+						console.error(
+							"[Tester-Response] Error on " +
+							parsedData.path +
+							": Received HTTP status " +
+							res.status,
+						);
+						response[(parsedData.path as string)] = {code: res.status, message: res.data};
+					} else {
+						response[(parsedData.path as string)] = {code: res.status, message: res.data};
+					}
+				} catch (err) {
+					console.error(
+						"[Tester-Response] Error on " + parsedData.path + ": " + err,
+					);
+					response[(parsedData.path as string)] = {code: 500, message: ((err as Error).message)};
+				}
+			}
+		}
+	}
+	return response;
+}
+
 interface FileInterface {
 	method?: string;
 	path?: string;
