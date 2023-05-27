@@ -1,7 +1,6 @@
 import {Router} from "express";
+import {cacheStatus} from "../../util/variables.js";
 const router = Router();
-import {endpointTest} from "../../util/test.js";
-import {ready} from "../index.js";
 
 // Documentation - START
 // GET : /test/APIStatus
@@ -10,16 +9,7 @@ import {ready} from "../index.js";
 // Expected Output : statusResponse[]
 // Documentation - END
 router.get("/APIStatus", async (req, res) => {
-	if (ready === true) {
-		try {
-			const result = await endpointTest();
-			res.status(200).json(result);
-		} catch (error) {
-			res.status(500).json({code: "500", message: "Server not ready"});
-		}
-	} else {
-		res.status(500).json({code: "500", message: "Server not ready"});
-	}
+	res.status(200).json(cacheStatus);
 });
 
 export default router;

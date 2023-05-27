@@ -1,9 +1,12 @@
-
 import axios from "axios";
 import {readdirSync, readFileSync} from "fs";
+import {cacheStatus} from "./variables.js";
 
 
-async function startTest() {
+export async function endpointTest() {
+	const response: {[key: string]: {
+		[key: string]: string | number | boolean
+	}} = {};
 	const dirs = readdirSync("./dist/app/", {
 		withFileTypes: true,
 	})
@@ -18,18 +21,10 @@ async function startTest() {
 				encoding: "utf-8",
 			});
 			const endpoints = parseEndpoints(fileData);
-			console.log("[Tester] Router: " + folder + " File: " + file);
-			console.log("[Tester] Endpoints found on " + file + ": " + endpoints.length);
-			console.log("[Tester] Running tests...");
 			for (const endpoint of endpoints) {
 				const parsedData = parseEndpoint(endpoint);
-				console.log("[Tester] Endpoint: " + parsedData.method + " " + parsedData.path);
-				if (parsedData.body) {
-					console.log("[Tester] bodyTestInput: " + JSON.stringify(parsedData.bodyTestInput));
-				}
 				if (parsedData.params) {
 					// loop through paramsTest and append to path
-					console.log("[Tester] paramsTest: " + JSON.stringify(parsedData.paramsTest));
 					let paramsAppend = "?";
 					for (const key in parsedData.paramsTest) {
 						// eslint-disable-next-line no-prototype-builtins
@@ -38,51 +33,49 @@ async function startTest() {
 							paramsAppend += key + "=" + `${value}` + "&";
 						}
 					}
-					console.log(parsedData.paramsTest);
 					paramsAppend = paramsAppend.slice(0, -1);
-					console.log("[Tester] paramsAppend: " + paramsAppend);
 					parsedData.path += paramsAppend;
 				}
 				try {
-					const res = await axios.request({
-						method: parsedData.method,
-						url: "http://localhost:3000/" + parsedData.path,
-						headers: {
-							"Content-Type": "application/json",
-						},
-						data: parsedData.bodyTestInput,
-					});
-					console.log("[Tester-Response] Response: " + JSON.stringify(res.data));
-					if (res.status >= 400) {
-						console.error(
-							"[Tester-Response] Error on " +
-							parsedData.path +
-							": Received HTTP status " +
-							res.status,
-						);
-						process.exit(1); // Exit the process with a non-zero code to indicate failure
+					if (parsedData.path?.includes("/APIStatus")) {
+						response[(parsedData.path as string)] = {code: 200, message: "OK"};
+					} else {
+						const res = await axios.request({
+							method: parsedData.method,
+							url: "http://localhost:3000/" + parsedData.path,
+							headers: {
+								"Content-Type": "application/json",
+							},
+							data: parsedData.bodyTestInput,
+						});
+						if (res.status >= 400) {
+							console.error(
+								"[Tester-Response] Error on " +
+                                parsedData.path +
+                                ": Received HTTP status " +
+                                res.status,
+							);
+							response[(parsedData.path as string)] = {code: res.status, message: res.data};
+						} else {
+							response[(parsedData.path as string)] = {code: res.status, message: res.data};
+						}
 					}
 				} catch (err) {
-					console.error(
+					console.log(
 						"[Tester-Response] Error on " + parsedData.path + ": " + err,
 					);
+					response[(parsedData.path as string)] = {code: 500, message: ((err as Error).message)};
 				}
 			}
-			console.log("\n");
 		}
 	}
-}
+	cacheStatus["results"] = response;
+	console.log("[Cache] Cache status refreshed");
+	cacheStatus["lastUpdated"] = new Date();
+	console.log("[Cache] Cache last updated at " + cacheStatus["lastUpdated"]);
 
-
-interface FileInterface {
-	method?: string;
-	path?: string;
-	body?: boolean;
-	bodyObject?: object;
-	params?: boolean;
-	paramsTest?: object;
-	npm?: string;
-	bodyTestInput?: object;
+	// refresh cache every 1 hour
+	setTimeout(endpointTest, 3600000);
 }
 
 
@@ -146,4 +139,13 @@ function parseEndpoints(code: string) {
 	return data;
 }
 
-startTest();
+interface FileInterface {
+	method?: string;
+	path?: string;
+	body?: boolean;
+	bodyObject?: object;
+	params?: boolean;
+	paramsTest?: object;
+	npm?: string;
+	bodyTestInput?: object;
+}
