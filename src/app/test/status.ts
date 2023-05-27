@@ -15,7 +15,15 @@ router.get("/APIStatus", async (req, res) => {
 export default router;
 // Expected Output Interface - START
 // interface statusResponse {
-//     code: string;
-//     message: string;
+//     lastUpdated: Date; /c=Date of last time the api tested
+// 	   results: Result[];
+// }
+// Expected Output Interface - END
+
+// Expected Output Interface - START
+// interface Result {
+//     code: number;
+//     message: object;
+//     configuration: object;
 // }
 // Expected Output Interface - END

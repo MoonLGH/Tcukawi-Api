@@ -55,9 +55,9 @@ export async function endpointTest() {
                                 ": Received HTTP status " +
                                 res.status,
 							);
-							response[(parsedData.path as string)] = {code: res.status, message: res.data};
+							response[(parsedData.path as string)] = {code: res.status, message: res.data, configuration: JSON.parse(JSON.stringify(parsedData))};
 						} else {
-							response[(parsedData.path as string)] = {code: res.status, message: res.data};
+							response[(parsedData.path as string)] = {code: res.status, message: res.data, configuration: JSON.parse(JSON.stringify(parsedData))};
 						}
 					}
 				} catch (err) {

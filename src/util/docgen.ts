@@ -41,7 +41,7 @@ async function generateInterface() {
 
 
 function parseEndpoints(code: string) {
-	const text = code.split("// Expected Output Interface - END")[0].replaceAll("//", "");
+	const text = code.split("// Expected Output Interface - END")[0].replaceAll("//", "").replaceAll("/c=","//");
 
 	const returnedText = prettier.format(text, {
 		parser: "typescript",
