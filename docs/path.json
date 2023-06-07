@@ -3,7 +3,6 @@
     "default": "main",
     "order": [
       "main",
-      "installation",
       "rateLimit",
       "response",
       "token"
