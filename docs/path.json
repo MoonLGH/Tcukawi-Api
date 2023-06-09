@@ -12,6 +12,7 @@
   "rateLimit": "rate-limit.md",
   "response": "responses.md",
   "token": "token.md",
+  "installation": "installation.md",
   "API": {
     "downloader-instagram": "./docs/API/downloader-instagram.md",
     "downloader-tiktok": "./docs/API/downloader-tiktok.md",
