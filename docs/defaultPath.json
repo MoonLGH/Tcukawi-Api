@@ -4,8 +4,8 @@
         "order":["main","rateLimit","response","token"]
     },
     "main":"main.md",
+    "installation":"installation.md",
     "rateLimit":"rate-limit.md",
     "response":"responses.md",
-    "token":"token.md",
-    "installation":"installation.md"
+    "token":"token.md"
 }
