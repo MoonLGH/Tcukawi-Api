@@ -2,7 +2,7 @@ import {Router} from "express";
 const router = Router();
 
 // Documentation - START
-// GET : /test/
+// GET : /test
 // body : false
 // NPM : api.call.test()
 // Expected Output : TestOutput

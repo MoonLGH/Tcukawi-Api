@@ -16,6 +16,7 @@
   "API": {
     "downloader-instagram": "./docs/API/downloader-instagram.md",
     "downloader-tiktok": "./docs/API/downloader-tiktok.md",
+    "test-errorTest": "./docs/API/test-errorTest.md",
     "test-APIStatus": "./docs/API/test-APIStatus.md",
     "test": "./docs/API/test.md",
     "test-bodyTest": "./docs/API/test-bodyTest.md",
